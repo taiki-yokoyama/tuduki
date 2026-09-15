@@ -1,10 +1,8 @@
 'use client';
 
-import { Pencil, Trash2 } from 'lucide-react';
+import { Pencil, Trash2, Hash } from 'lucide-react';
 import type { EntryWithRelations } from '@/lib/types';
-import { MOOD_EMOJIS, MOOD_LABELS } from '@/lib/types';
 import { formatDate, getWeekdayLabel } from '@/lib/date-utils';
-import { PersonAvatar } from './person-avatar';
 import { EntryImageGallery } from './entry-image-gallery';
 import { cn } from '@/lib/utils';
 
@@ -24,30 +22,15 @@ export function EntryCard({ entry, onEdit, onDelete, onPersonClick, compact }: E
         compact && 'p-3 sm:p-4'
       )}
     >
-      {/* Date + Mood header */}
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-baseline gap-2">
-          <span className="text-sm font-bold text-ink">
-            {formatDate(entry.entry_date)}
-          </span>
-          <span className="text-xs text-ink-muted">
-            ({getWeekdayLabel(entry.entry_date)})
-          </span>
-        </div>
-        {entry.mood && (
-          <div className="flex items-center gap-1 text-xs text-ink-muted">
-            <span className="text-base">{MOOD_EMOJIS[entry.mood] ?? ''}</span>
-            <span className="hidden sm:inline">{MOOD_LABELS[entry.mood] ?? entry.mood}</span>
-          </div>
-        )}
+      {/* Date header */}
+      <div className="flex items-baseline gap-2 mb-2">
+        <span className="text-sm font-bold text-ink">
+          {formatDate(entry.entry_date)}
+        </span>
+        <span className="text-xs text-ink-muted">
+          ({getWeekdayLabel(entry.entry_date)})
+        </span>
       </div>
-
-      {/* Title */}
-      {entry.title && (
-        <h3 className="text-lg font-bold text-ink mb-1.5 leading-snug">
-          {entry.title}
-        </h3>
-      )}
 
       {/* Content */}
       {entry.content && (
@@ -65,18 +48,17 @@ export function EntryCard({ entry, onEdit, onDelete, onPersonClick, compact }: E
         </div>
       )}
 
-      {/* Tagged people */}
+      {/* Hashtag people */}
       {entry.people && entry.people.length > 0 && (
-        <div className="mt-3 flex flex-wrap items-center gap-1.5">
-          <span className="text-xs text-ink-faint">一緒にいた人</span>
+        <div className="mt-3 flex flex-wrap gap-1.5">
           {entry.people.map((person) => (
             <button
               key={person.id}
               onClick={() => onPersonClick?.(person.id)}
-              className="flex items-center gap-1.5 rounded-sm px-1.5 py-0.5 border border-gray-200 hover:bg-gray-50 hover:border-gray-300 transition-colors"
+              className="flex items-center gap-0.5 text-xs font-bold text-ink-muted hover:text-ink hover:bg-yellow px-1.5 py-0.5 rounded-sm transition-colors"
             >
-              <PersonAvatar person={person} size="sm" />
-              <span className="text-xs font-medium text-ink">{person.name}</span>
+              <Hash className="w-3 h-3" strokeWidth={2.5} />
+              <span>{person.name}</span>
             </button>
           ))}
         </div>

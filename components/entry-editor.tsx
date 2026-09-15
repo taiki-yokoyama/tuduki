@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { X, Upload, Loader2, Plus } from 'lucide-react';
 import type { EntryWithRelations, Person, Group } from '@/lib/types';
-import { MOODS } from '@/lib/types';
 import { todayString } from '@/lib/date-utils';
 import {
   createEntry,
@@ -41,9 +40,7 @@ export function EntryEditor({
   groups,
   editingEntry,
 }: EntryEditorProps) {
-  const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [mood, setMood] = useState<string>('');
   const [entryDate, setEntryDate] = useState(todayString());
   const [selectedPersonIds, setSelectedPersonIds] = useState<string[]>([]);
   const [images, setImages] = useState<UploadedImage[]>([]);
@@ -57,9 +54,7 @@ export function EntryEditor({
   useEffect(() => {
     if (open) {
       if (editingEntry) {
-        setTitle(editingEntry.title);
         setContent(editingEntry.content);
-        setMood(editingEntry.mood ?? '');
         setEntryDate(editingEntry.entry_date);
         setSelectedPersonIds(editingEntry.people?.map((p) => p.id) ?? []);
         setImages(
@@ -70,9 +65,7 @@ export function EntryEditor({
           }))
         );
       } else {
-        setTitle('');
         setContent('');
-        setMood('');
         setEntryDate(todayString());
         setSelectedPersonIds([]);
         setImages([]);
@@ -120,10 +113,10 @@ export function EntryEditor({
   };
 
   const handleSave = async () => {
-    if (!content.trim() && !title.trim()) {
+    if (!content.trim()) {
       toast({
         title: '入力不足',
-        description: 'タイトルまたは本文を入力してください。',
+        description: '本文を入力してください。',
         variant: 'destructive',
       });
       return;
@@ -133,9 +126,9 @@ export function EntryEditor({
     try {
       if (isEditing && editingEntry) {
         await updateEntry(editingEntry.id, {
-          title: title.trim(),
+          title: '',
           content: content.trim(),
-          mood: mood || null,
+          mood: null,
           entry_date: entryDate,
         });
         await setEntryPeople(editingEntry.id, selectedPersonIds);
@@ -160,9 +153,9 @@ export function EntryEditor({
         }
       } else {
         await createEntry(
-          title.trim(),
+          '',
           content.trim(),
-          mood || null,
+          null,
           entryDate,
           selectedPersonIds,
           images.map((img, idx) => ({ path: img.path, displayOrder: idx }))
@@ -217,48 +210,14 @@ export function EntryEditor({
           />
         </div>
 
-        {/* Mood */}
-        <div className="mb-4">
-          <label className="block text-xs font-bold text-ink mb-1.5">気分</label>
-          <div className="flex flex-wrap gap-1.5">
-            {MOODS.map((m) => (
-              <button
-                key={m.value}
-                onClick={() => setMood(mood === m.value ? '' : m.value)}
-                className={cn(
-                  'flex items-center gap-1.5 px-3 py-1.5 rounded-sm border text-sm transition-colors',
-                  mood === m.value
-                    ? 'bg-yellow border-yellow text-ink font-bold'
-                    : 'bg-white border-gray-300 text-ink-muted hover:border-gray-400'
-                )}
-              >
-                <span className="text-base">{m.emoji}</span>
-                <span>{m.label}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Title */}
-        <div className="mb-4">
-          <label className="block text-xs font-bold text-ink mb-1.5">タイトル</label>
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="今日のタイトル..."
-            className="w-full bg-white border border-gray-300 rounded-sm px-3 py-2 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-ink transition-colors"
-          />
-        </div>
-
         {/* Content */}
         <div className="mb-4">
-          <label className="block text-xs font-bold text-ink mb-1.5">本文</label>
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder="何があった？誰と会った？どんな気持ちだった？"
-            rows={6}
+            rows={8}
+            autoFocus
             className="w-full bg-white border border-gray-300 rounded-sm px-3 py-2 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-ink transition-colors resize-none leading-relaxed"
           />
         </div>
