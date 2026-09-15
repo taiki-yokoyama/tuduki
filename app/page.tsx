@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Plus, Calendar, BookOpen, Users, Settings } from 'lucide-react';
+import { Plus, Calendar, BookOpen, Users, Settings, LogOut } from 'lucide-react';
 import { TimelineView } from '@/components/timeline-view';
 import { CalendarView } from '@/components/calendar-view';
 import { PeopleView } from '@/components/people-view';
 import { EntryEditor } from '@/components/entry-editor';
 import { PeopleManager } from '@/components/people-manager';
+import { AuthScreen } from '@/components/auth-screen';
+import { useAuth } from '@/lib/auth-context';
 import { fetchAllEntries, fetchPeople, fetchGroups, deleteEntry } from '@/lib/data';
 import type { EntryWithRelations, Person, Group } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
@@ -15,6 +17,8 @@ import { cn } from '@/lib/utils';
 type Tab = 'timeline' | 'calendar' | 'people';
 
 export default function Home() {
+  const { user, loading: authLoading, signOut } = useAuth();
+
   const [tab, setTab] = useState<Tab>('timeline');
   const [entries, setEntries] = useState<EntryWithRelations[]>([]);
   const [people, setPeople] = useState<Person[]>([]);
@@ -50,8 +54,13 @@ export default function Home() {
   }, [toast]);
 
   useEffect(() => {
-    loadAll();
-  }, [loadAll]);
+    if (user) {
+      setLoading(true);
+      loadAll();
+    } else {
+      setLoading(false);
+    }
+  }, [user, loadAll]);
 
   const handleNewEntry = () => {
     setEditingEntry(null);
@@ -86,6 +95,26 @@ export default function Home() {
   const handlePeopleChanged = () => {
     loadAll();
   };
+
+  const handleSignOut = async () => {
+    await signOut();
+    toast({ title: 'ログアウトしました' });
+  };
+
+  // Show auth screen while checking session or when not logged in
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="w-8 h-8 rounded-md bg-yellow flex items-center justify-center">
+          <BookOpen className="w-4 h-4 text-ink" strokeWidth={2.5} />
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <AuthScreen />;
+  }
 
   const tabs: { id: Tab; label: string; icon: typeof Calendar }[] = [
     { id: 'timeline', label: 'タイムライン', icon: BookOpen },
@@ -122,6 +151,13 @@ export default function Home() {
                 <Settings className="w-5 h-5" strokeWidth={1.5} />
               </button>
               <button
+                onClick={handleSignOut}
+                className="p-2 rounded-sm text-ink-muted hover:text-ink hover:bg-gray-100 transition-colors"
+                title="ログアウト"
+              >
+                <LogOut className="w-5 h-5" strokeWidth={1.5} />
+              </button>
+              <button
                 onClick={handleNewEntry}
                 className="flex items-center gap-1.5 px-3 py-2 rounded-sm bg-yellow text-ink text-sm font-bold hover:bg-yellow-dark transition-colors"
               >
@@ -132,7 +168,7 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Tab navigation — horizontal text with yellow underline */}
+          {/* Tab navigation */}
           <nav className="flex items-center gap-1 -mb-px">
             {tabs.map(({ id, label, icon: Icon }) => (
               <button
@@ -153,7 +189,7 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Stats bar — simple inline numbers */}
+      {/* Stats bar */}
       <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-6">
         <div className="flex items-baseline gap-5 text-sm">
           <div className="flex items-baseline gap-1.5">
