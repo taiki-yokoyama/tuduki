@@ -273,6 +273,7 @@ export default function Home() {
         onChanged={handlePeopleChanged}
         people={people}
         groups={groups}
+        entries={entries}
       />
 
       {/* Floating action button (mobile) */}

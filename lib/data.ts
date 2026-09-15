@@ -205,6 +205,45 @@ export async function deleteImage(storagePath: string): Promise<void> {
   if (error) throw error;
 }
 
+// ============ CSV Export ============
+
+function escapeCSV(value: string): string {
+  if (value.includes(',') || value.includes('"') || value.includes('\n')) {
+    return '"' + value.replace(/"/g, '""') + '"';
+  }
+  return value;
+}
+
+export function exportEntriesCSV(entries: EntryWithRelations[]): string {
+  const header = ['日付', '曜日', '本文', '一緒にいた人', '画像枚数'];
+  const rows = entries.map((entry) => {
+    const d = new Date(entry.entry_date + 'T00:00:00');
+    const weekday = ['日','月','火','水','木','金','土'][d.getDay()];
+    const peopleNames = (entry.people ?? []).map((p) => p.name).join(' / ');
+    const imageCount = String(entry.images?.length ?? 0);
+    return [
+      escapeCSV(entry.entry_date),
+      escapeCSV(weekday),
+      escapeCSV(entry.content ?? ''),
+      escapeCSV(peopleNames),
+      escapeCSV(imageCount),
+    ].join(',');
+  });
+  return '\uFEFF' + header.join(',') + '\n' + rows.join('\n');
+}
+
+export function downloadCSV(csv: string, filename: string): void {
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
 // ============ Helpers ============
 
 function transformEntry(raw: any): EntryWithRelations {

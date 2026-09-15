@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Plus, Trash2, Loader2, FolderPlus, UserPlus, Users } from 'lucide-react';
-import type { Person, Group } from '@/lib/types';
+import { X, Plus, Trash2, Loader2, FolderPlus, UserPlus, Users, Download } from 'lucide-react';
+import type { Person, Group, EntryWithRelations } from '@/lib/types';
 import { AVATAR_COLORS, GROUP_COLORS } from '@/lib/types';
 import {
   createPerson,
@@ -10,6 +10,8 @@ import {
   deletePerson,
   createGroup,
   deleteGroup,
+  exportEntriesCSV,
+  downloadCSV,
 } from '@/lib/data';
 import { PersonAvatar } from './person-avatar';
 import { cn } from '@/lib/utils';
@@ -21,10 +23,11 @@ interface PeopleManagerProps {
   onChanged: () => void;
   people: Person[];
   groups: Group[];
+  entries: EntryWithRelations[];
 }
 
-export function PeopleManager({ open, onClose, onChanged, people, groups }: PeopleManagerProps) {
-  const [tab, setTab] = useState<'people' | 'groups'>('people');
+export function PeopleManager({ open, onClose, onChanged, people, groups, entries }: PeopleManagerProps) {
+  const [tab, setTab] = useState<'people' | 'groups' | 'data'>('people');
   const [showPersonForm, setShowPersonForm] = useState(false);
   const [showGroupForm, setShowGroupForm] = useState(false);
 
@@ -39,6 +42,7 @@ export function PeopleManager({ open, onClose, onChanged, people, groups }: Peop
   const [groupColor, setGroupColor] = useState<string>('black');
   const [groupSaving, setGroupSaving] = useState(false);
 
+  const [exporting, setExporting] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -141,6 +145,24 @@ export function PeopleManager({ open, onClose, onChanged, people, groups }: Peop
     }
   };
 
+  const handleExportCSV = () => {
+    if (entries.length === 0) {
+      toast({ title: 'データがありません', description: '日記を投稿してから書き出してください。' });
+      return;
+    }
+    setExporting(true);
+    try {
+      const csv = exportEntriesCSV(entries);
+      const today = new Date().toISOString().slice(0, 10);
+      downloadCSV(csv, `memora-${today}.csv`);
+      toast({ title: 'CSVを書き出しました', description: `${entries.length}件の日記をダウンロードしました。` });
+    } catch {
+      toast({ title: '書き出しに失敗しました', variant: 'destructive' });
+    } finally {
+      setExporting(false);
+    }
+  };
+
   if (!open) return null;
 
   return (
@@ -175,6 +197,16 @@ export function PeopleManager({ open, onClose, onChanged, people, groups }: Peop
           >
             <Users className="w-4 h-4" />
             グループ ({groups.length})
+          </button>
+          <button
+            onClick={() => setTab('data')}
+            className={cn(
+              'flex items-center gap-1.5 px-3 py-2 text-sm border-b-2 transition-colors -mb-px',
+              tab === 'data' ? 'border-yellow font-bold text-ink' : 'border-transparent text-ink-muted hover:text-ink'
+            )}
+          >
+            <Download className="w-4 h-4" />
+            データ
           </button>
         </div>
 
@@ -310,6 +342,35 @@ export function PeopleManager({ open, onClose, onChanged, people, groups }: Peop
                   </div>
                 );
               })}
+            </div>
+          </div>
+        )}
+
+        {/* Data tab */}
+        {tab === 'data' && (
+          <div>
+            <div className="border border-gray-200 rounded-md p-5">
+              <h3 className="text-sm font-bold text-ink mb-2">データを書き出す</h3>
+              <p className="text-xs text-ink-muted leading-relaxed mb-4">
+                あなたの日記データをCSVファイルとして書き出せます。本文、日付、一緒にいた人が含まれます。万が一のバックアップとしてご利用ください。
+              </p>
+              <button
+                onClick={handleExportCSV}
+                disabled={exporting}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-sm bg-yellow text-ink text-sm font-bold hover:bg-yellow-dark transition-colors disabled:opacity-50"
+              >
+                {exporting ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Download className="w-4 h-4" />
+                )}
+                CSVを書き出す（{entries.length}件）
+              </button>
+              {entries.length === 0 && (
+                <p className="text-xs text-ink-faint mt-3">
+                  まだ日記がないため、書き出せるデータはありません。
+                </p>
+              )}
             </div>
           </div>
         )}
