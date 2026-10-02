@@ -3,146 +3,471 @@ info:
   title: Tuduki API
   version: 1.0.0
   description: |
-    Tuduki の日記エントリー API。
-    Laravel の API プレフィックスとして /api が付与されます。
+    main ブランチの元プロダクト（Memora）の機能を移行するための API 契約。
+    認証済みユーザー自身のグループ、人物、日記、タグ、画像を扱います。
 
 servers:
   - url: http://localhost:8081/api
     description: Local Docker environment
 
+security:
+  - bearerAuth: []
+
 tags:
-  - name: System
-    description: サービス状態
-  - name: Entries
+  - name: Auth
+    description: ユーザー認証
+  - name: Groups
+    description: 人物グループ
+  - name: Person
+    description: 記録する人物（Person）
+  - name: Diaries
     description: 日記エントリー
+  - name: DiaryPerson
+    description: 日記と人物の関連付け
+  - name: Images
+    description: 日記画像
 
 paths:
-  /health:
-    get:
-      operationId: getHealth
-      summary: API の稼働確認
+  /auth/sign-up:
+    post:
+      security: []
+      operationId: signUp
+      summary: ユーザー登録
       tags:
-        - System
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignUpRequest'
       responses:
-        '200':
-          description: API is healthy
+        '201':
+          description: 登録されたユーザーとアクセストークン
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HealthResponse'
+                $ref: '#/components/schemas/AuthResponse'
+        '422':
+          $ref: '#/components/responses/ValidationError'
 
-  /entries:
-    get:
-      operationId: listEntries
-      summary: エントリー一覧を取得
+  /auth/sign-in:
+    post:
+      security: []
+      operationId: signIn
+      summary: ログイン
       tags:
-        - Entries
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignInRequest'
       responses:
         '200':
-          description: エントリー一覧
+          description: ログインしたユーザーとアクセストークン
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /auth/sign-out:
+    post:
+      operationId: signOut
+      summary: ログアウト
+      tags:
+        - Auth
+      responses:
+        '204':
+          description: ログアウト成功。レスポンスボディはありません。
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/me:
+    get:
+      operationId: getCurrentUser
+      summary: ログイン中のユーザーを取得
+      tags:
+        - Auth
+      responses:
+        '200':
+          description: 現在のユーザー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /groups:
+    get:
+      operationId: listGroups
+      summary: グループ一覧を取得
+      tags:
+        - Groups
+      responses:
+        '200':
+          description: sort_order 昇順のグループ一覧
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Entry'
+                  $ref: '#/components/schemas/Group'
 
     post:
-      operationId: createEntry
-      summary: エントリーを作成
+      operationId: createGroup
+      summary: グループを作成
       tags:
-        - Entries
+        - Groups
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/EntryCreateRequest'
-            example:
-              title: 今日の気づき
-              body: Docker 環境の構成を整えた。
-              written_at: '2026-10-02'
+              $ref: '#/components/schemas/GroupCreateRequest'
       responses:
         '201':
-          description: 作成されたエントリー
+          description: 作成されたグループ
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Entry'
+                $ref: '#/components/schemas/Group'
         '422':
           $ref: '#/components/responses/ValidationError'
 
-  /entries/{entry}:
+  /groups/{group}:
     parameters:
-      - $ref: '#/components/parameters/EntryId'
-
-    get:
-      operationId: getEntry
-      summary: エントリーを1件取得
-      tags:
-        - Entries
-      responses:
-        '200':
-          description: エントリー
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Entry'
-        '404':
-          $ref: '#/components/responses/NotFound'
-
-    put:
-      operationId: replaceEntry
-      summary: エントリーを更新
-      description: Laravel の実装に合わせ、更新対象のフィールドだけを送信できます。
-      tags:
-        - Entries
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/EntryUpdateRequest'
-      responses:
-        '200':
-          description: 更新されたエントリー
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Entry'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '422':
-          $ref: '#/components/responses/ValidationError'
-
-    patch:
-      operationId: patchEntry
-      summary: エントリーを部分更新
-      tags:
-        - Entries
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/EntryUpdateRequest'
-      responses:
-        '200':
-          description: 更新されたエントリー
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Entry'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '422':
-          $ref: '#/components/responses/ValidationError'
-
+      - $ref: '#/components/parameters/GroupId'
     delete:
-      operationId: deleteEntry
-      summary: エントリーを削除
+      operationId: deleteGroup
+      summary: グループを削除
+      description: グループ削除時、所属人物の group_id は null になります。
       tags:
-        - Entries
+        - Groups
+      responses:
+        '204':
+          description: 削除成功。レスポンスボディはありません。
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /people:
+    get:
+      operationId: listPeople
+      summary: 人物一覧を取得
+      tags:
+        - Person
+      parameters:
+        - name: group_id
+          in: query
+          description: グループで絞り込む場合のグループ ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 名前順の人物一覧。各人物に所属グループを含みます。
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Person'
+
+    post:
+      operationId: createPerson
+      summary: 人物を作成
+      tags:
+        - Person
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PersonCreateRequest'
+      responses:
+        '201':
+          description: 作成された人物
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Person'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /people/{person}:
+    parameters:
+      - $ref: '#/components/parameters/PersonId'
+    patch:
+      operationId: updatePerson
+      summary: 人物を更新
+      tags:
+        - Person
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PersonUpdateRequest'
+      responses:
+        '200':
+          description: 更新された人物
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Person'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+    delete:
+      operationId: deletePerson
+      summary: 人物を削除
+      description: 人物削除時、関連する diary_people も削除されます。
+      tags:
+        - Person
+      responses:
+        '204':
+          description: 削除成功。レスポンスボディはありません。
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /diaries:
+    get:
+      operationId: listDiaries
+      summary: 日記一覧を取得
+      description: |
+        diary_date の降順、created_at の降順で返します。
+        person_id と日付範囲は組み合わせて指定できます。
+      tags:
+        - Diaries
+      parameters:
+        - name: person_id
+          in: query
+          description: 一緒にいた人物で絞り込む
+          schema:
+            type: string
+            format: uuid
+        - name: start_date
+          in: query
+          description: 取得開始日（この日を含む）
+          schema:
+            type: string
+            format: date
+        - name: end_date
+          in: query
+          description: 取得終了日（この日を含む）
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: 人物と画像を含む日記一覧
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Diary'
+
+    post:
+      operationId: createDiary
+      summary: 日記を作成
+      tags:
+        - Diaries
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DiaryCreateRequest'
+            example:
+              title: ''
+              content: 今日は友人とゆっくり話した。
+              mood: calm
+              diary_date: '2026-10-02'
+              person_ids:
+                - 7a4b3b25-5b1b-4f5b-9b45-3b0a7e6e0001
+              images:
+                - storage_path: 1727840000-cafe.jpg
+                  display_order: 0
+      responses:
+        '201':
+          description: 作成された日記
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Diary'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /diaries/{diary}:
+    parameters:
+      - $ref: '#/components/parameters/DiaryId'
+    get:
+      operationId: getDiary
+      summary: 日記を1件取得
+      tags:
+        - Diaries
+      responses:
+        '200':
+          description: 人物と画像を含む日記
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Diary'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      operationId: updateDiary
+      summary: 日記を更新
+      tags:
+        - Diaries
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DiaryUpdateRequest'
+      responses:
+        '200':
+          description: 更新された日記
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Diary'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+    delete:
+      operationId: deleteDiary
+      summary: 日記を削除
+      description: 関連する人物タグと画像メタデータも削除されます。
+      tags:
+        - Diaries
+      responses:
+        '204':
+          description: 削除成功。レスポンスボディはありません。
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /diaries/{diary}/people:
+    parameters:
+      - $ref: '#/components/parameters/DiaryId'
+    put:
+      operationId: replaceDiaryPeople
+      summary: 日記に紐づく人物を置き換え
+      description: 既存の人物タグを全削除し、指定された人物 ID の一覧に置き換えます。
+      tags:
+        - DiaryPerson
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DiaryPeopleRequest'
+      responses:
+        '200':
+          description: 更新後の人物一覧
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Person'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /images:
+    post:
+      operationId: uploadImage
+      summary: 画像をアップロード
+      description: エントリー作成前に画像をアップロードし、返却された storage_path を使用します。
+      tags:
+        - Images
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: アップロードされた画像
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadedImage'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /diaries/{diary}/images:
+    parameters:
+      - $ref: '#/components/parameters/DiaryId'
+    get:
+      operationId: listDiaryImages
+      summary: 日記の画像一覧を取得
+      tags:
+        - Images
+      responses:
+        '200':
+          description: display_order 順の画像一覧
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DiaryImage'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      operationId: attachDiaryImage
+      summary: 日記に画像を紐づけ
+      tags:
+        - Images
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DiaryImageAttachRequest'
+      responses:
+        '201':
+          description: 紐づけられた画像
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DiaryImage'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /diaries/{diary}/images/{image}:
+    parameters:
+      - $ref: '#/components/parameters/DiaryId'
+      - $ref: '#/components/parameters/ImageId'
+    delete:
+      operationId: deleteDiaryImage
+      summary: 日記から画像を削除
+      tags:
+        - Images
       responses:
         '204':
           description: 削除成功。レスポンスボディはありません。
@@ -150,28 +475,63 @@ paths:
           $ref: '#/components/responses/NotFound'
 
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
   parameters:
-    EntryId:
-      name: entry
+    GroupId:
+      name: group
       in: path
       required: true
-      description: エントリー ID
+      description: グループ ID
       schema:
-        type: integer
-        format: int64
-        minimum: 1
-      example: 1
+        type: string
+        format: uuid
+    PersonId:
+      name: person
+      in: path
+      required: true
+      description: 人物 ID
+      schema:
+        type: string
+        format: uuid
+    DiaryId:
+      name: diary
+      in: path
+      required: true
+      description: 日記エントリー ID
+      schema:
+        type: string
+        format: uuid
+    ImageId:
+      name: image
+      in: path
+      required: true
+      description: エントリー画像 ID
+      schema:
+        type: string
+        format: uuid
 
   responses:
-    NotFound:
-      description: 指定されたエントリーが存在しません。
+    Unauthorized:
+      description: 認証が必要、または認証情報が無効です。
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
           example:
-            message: No query results for model [App\\Models\\Entry].
-
+            message: Unauthenticated.
+    NotFound:
+      description: 指定されたリソースが存在しません。
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            message: Resource not found.
     ValidationError:
       description: 入力値が不正です。
       content:
@@ -179,87 +539,344 @@ components:
           schema:
             $ref: '#/components/schemas/ValidationErrorResponse'
           example:
-            message: The title field is required.
+            message: The content field is required.
             errors:
-              title:
-                - The title field is required.
+              content:
+                - The content field is required.
 
   schemas:
-    HealthResponse:
+    user:
       type: object
       required:
-        - status
-        - service
+        - id
+        - email
+        - created_at
       properties:
-        status:
+        id:
           type: string
-          const: ok
-        service:
+          format: uuid
+        email:
           type: string
-          example: tuduki-api
+          format: email
+        created_at:
+          type: string
+          format: date-time
 
-    Entry:
+    SignUpRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+          minLength: 8
+
+    SignInRequest:
+      $ref: '#/components/schemas/SignUpRequest'
+
+    AuthResponse:
+      type: object
+      required:
+        - user
+        - access_token
+        - token_type
+      properties:
+        user:
+          $ref: '#/components/schemas/user'
+        access_token:
+          type: string
+        token_type:
+          type: string
+          const: Bearer
+
+    Group:
+      type: object
+      required:
+        - id
+        - name
+        - color
+        - sort_order
+        - created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        color:
+          type: string
+          example: indigo
+        sort_order:
+          type: integer
+          example: 0
+        created_at:
+          type: string
+          format: date-time
+
+    GroupCreateRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          minLength: 1
+        color:
+          type: string
+          default: indigo
+        sort_order:
+          type: integer
+          default: 0
+
+    Person:
+      type: object
+      required:
+        - id
+        - name
+        - group_id
+        - notes
+        - avatar_color
+        - created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        group_id:
+          type:
+            - string
+            - 'null'
+          format: uuid
+        notes:
+          type:
+            - string
+            - 'null'
+        avatar_color:
+          type: string
+          example: indigo
+        created_at:
+          type: string
+          format: date-time
+        group:
+          anyOf:
+            - $ref: '#/components/schemas/Group'
+            - type: 'null'
+
+    PersonCreateRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          minLength: 1
+        group_id:
+          type:
+            - string
+            - 'null'
+          format: uuid
+        notes:
+          type:
+            - string
+            - 'null'
+        avatar_color:
+          type: string
+          default: indigo
+
+    PersonUpdateRequest:
+      type: object
+      minProperties: 1
+      properties:
+        name:
+          type: string
+          minLength: 1
+        group_id:
+          type:
+            - string
+            - 'null'
+          format: uuid
+        notes:
+          type:
+            - string
+            - 'null'
+        avatar_color:
+          type: string
+
+    Diary:
       type: object
       required:
         - id
         - title
-        - body
-        - written_at
+        - content
+        - mood
+        - diary_date
         - created_at
         - updated_at
+        - people
+        - images
       properties:
         id:
-          type: integer
-          format: int64
-          example: 1
+          type: string
+          format: uuid
         title:
           type: string
-          maxLength: 120
-          example: 今日の気づき
-        body:
+        content:
           type: string
-          example: Docker 環境の構成を整えた。
-        written_at:
+        mood:
+          type:
+            - string
+            - 'null'
+          enum:
+            - joyful
+            - calm
+            - thoughtful
+            - neutral
+            - tired
+            - null
+        diary_date:
           type: string
           format: date
-          example: '2026-10-02'
         created_at:
           type: string
           format: date-time
-          example: '2026-10-02T04:53:28.000000Z'
         updated_at:
           type: string
           format: date-time
-          example: '2026-10-02T04:53:28.000000Z'
+        people:
+          type: array
+          items:
+            $ref: '#/components/schemas/Person'
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiaryImage'
 
-    EntryCreateRequest:
+    DiaryCreateRequest:
       type: object
       required:
-        - title
-        - body
-        - written_at
+        - content
+        - diary_date
       properties:
         title:
           type: string
-          maxLength: 120
-        body:
+          default: ''
+        content:
           type: string
-        written_at:
+          minLength: 1
+        mood:
+          type:
+            - string
+            - 'null'
+          enum:
+            - joyful
+            - calm
+            - thoughtful
+            - neutral
+            - tired
+            - null
+        diary_date:
           type: string
           format: date
+        person_ids:
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+            format: uuid
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiaryImageAttachRequest'
 
-    EntryUpdateRequest:
+    DiaryUpdateRequest:
       type: object
       minProperties: 1
       properties:
         title:
           type: string
-          maxLength: 120
-        body:
+        content:
           type: string
-        written_at:
+          minLength: 1
+        mood:
+          type:
+            - string
+            - 'null'
+          enum:
+            - joyful
+            - calm
+            - thoughtful
+            - neutral
+            - tired
+            - null
+        diary_date:
           type: string
           format: date
+
+    DiaryPeopleRequest:
+      type: object
+      required:
+        - person_ids
+      properties:
+        person_ids:
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+            format: uuid
+
+    DiaryImage:
+      type: object
+      required:
+        - id
+        - diary_id
+        - storage_path
+        - display_order
+        - url
+      properties:
+        id:
+          type: string
+          format: uuid
+        diary_id:
+          type: string
+          format: uuid
+        storage_path:
+          type: string
+        display_order:
+          type: integer
+          minimum: 0
+        url:
+          type: string
+          format: uri
+
+    DiaryImageAttachRequest:
+      type: object
+      required:
+        - storage_path
+      properties:
+        storage_path:
+          type: string
+        display_order:
+          type: integer
+          minimum: 0
+          default: 0
+
+    UploadedImage:
+      type: object
+      required:
+        - storage_path
+        - url
+      properties:
+        storage_path:
+          type: string
+        url:
+          type: string
+          format: uri
 
     ErrorResponse:
       type: object

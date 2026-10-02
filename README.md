@@ -15,6 +15,7 @@ docker compose up --build
 - Laravel API: http://localhost:8081/api/health
 - MySQL: localhost:3306
 - OpenAPI 定義: [docs/openapi.yaml](docs/openapi.yaml)
+- ユビキタス言語: [docs/ユビキタス.md](docs/ユビキタス.md)
 
 初回起動時は Laravel の依存関係をイメージにインストールし、MySQL が healthy になってからマイグレーションを実行します。
 
