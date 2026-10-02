@@ -5,20 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Entry extends Model
+class Diary extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'title',
-        'body',
-        'written_at',
+        'content',
+        'diary_date',
     ];
 
     protected function casts(): array
     {
         return [
-            'written_at' => 'date:Y-m-d',
+            'diary_date' => 'date:Y-m-d',
         ];
     }
 }

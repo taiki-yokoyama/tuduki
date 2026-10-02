@@ -21,7 +21,7 @@ tags:
   - name: Person
     description: 記録する人物（Person）
   - name: Diaries
-    description: 日記エントリー
+    description: 日記
   - name: DiaryPerson
     description: 日記と人物の関連付け
   - name: Images
@@ -287,9 +287,7 @@ paths:
             schema:
               $ref: '#/components/schemas/DiaryCreateRequest'
             example:
-              title: ''
               content: 今日は友人とゆっくり話した。
-              mood: calm
               diary_date: '2026-10-02'
               person_ids:
                 - 7a4b3b25-5b1b-4f5b-9b45-3b0a7e6e0001
@@ -392,7 +390,7 @@ paths:
     post:
       operationId: uploadImage
       summary: 画像をアップロード
-      description: エントリー作成前に画像をアップロードし、返却された storage_path を使用します。
+      description: 日記作成前に画像をアップロードし、返却された storage_path を使用します。
       tags:
         - Images
       requestBody:
@@ -502,7 +500,7 @@ components:
       name: diary
       in: path
       required: true
-      description: 日記エントリー ID
+      description: 日記 ID
       schema:
         type: string
         format: uuid
@@ -510,7 +508,7 @@ components:
       name: image
       in: path
       required: true
-      description: エントリー画像 ID
+      description: 日記画像 ID
       schema:
         type: string
         format: uuid
@@ -712,9 +710,7 @@ components:
       type: object
       required:
         - id
-        - title
         - content
-        - mood
         - diary_date
         - created_at
         - updated_at
@@ -724,21 +720,8 @@ components:
         id:
           type: string
           format: uuid
-        title:
-          type: string
         content:
           type: string
-        mood:
-          type:
-            - string
-            - 'null'
-          enum:
-            - joyful
-            - calm
-            - thoughtful
-            - neutral
-            - tired
-            - null
         diary_date:
           type: string
           format: date
@@ -763,23 +746,9 @@ components:
         - content
         - diary_date
       properties:
-        title:
-          type: string
-          default: ''
         content:
           type: string
           minLength: 1
-        mood:
-          type:
-            - string
-            - 'null'
-          enum:
-            - joyful
-            - calm
-            - thoughtful
-            - neutral
-            - tired
-            - null
         diary_date:
           type: string
           format: date
@@ -798,22 +767,9 @@ components:
       type: object
       minProperties: 1
       properties:
-        title:
-          type: string
         content:
           type: string
           minLength: 1
-        mood:
-          type:
-            - string
-            - 'null'
-          enum:
-            - joyful
-            - calm
-            - thoughtful
-            - neutral
-            - tired
-            - null
         diary_date:
           type: string
           format: date

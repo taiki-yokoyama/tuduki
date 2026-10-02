@@ -1,25 +1,23 @@
 import { FormEvent, useEffect, useState } from 'react'
 
-type Entry = {
+type Diary = {
   id: number
-  title: string
-  body: string
-  written_at: string
+  content: string
+  diary_date: string
 }
 
 const apiUrl = import.meta.env.VITE_API_URL ?? 'http://localhost:8081/api'
 
 function App() {
-  const [entries, setEntries] = useState<Entry[]>([])
-  const [title, setTitle] = useState('')
-  const [body, setBody] = useState('')
+  const [diaries, setDiaries] = useState<Diary[]>([])
+  const [content, setContent] = useState('')
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
-    fetch(`${apiUrl}/entries`)
+    fetch(apiUrl + '/diaries')
       .then((response) => response.ok ? response.json() : Promise.reject(new Error('読み込みに失敗しました')))
-      .then(setEntries)
+      .then(setDiaries)
       .catch(() => setError('API に接続できません。Docker コンテナが起動しているか確認してください。'))
   }, [])
 
@@ -29,21 +27,19 @@ function App() {
     setSaving(true)
 
     try {
-      const response = await fetch(`${apiUrl}/entries`, {
+      const response = await fetch(apiUrl + '/diaries', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
         body: JSON.stringify({
-          title,
-          body,
-          written_at: new Date().toISOString().slice(0, 10),
+          content,
+          diary_date: new Date().toISOString().slice(0, 10),
         }),
       })
 
       if (!response.ok) throw new Error('保存に失敗しました')
-      const entry = await response.json() as Entry
-      setEntries((current) => [entry, ...current])
-      setTitle('')
-      setBody('')
+      const diary = await response.json() as Diary
+      setDiaries((current) => [diary, ...current])
+      setContent('')
     } catch {
       setError('保存に失敗しました。入力内容と API の状態を確認してください。')
     } finally {
@@ -60,27 +56,24 @@ function App() {
       </header>
 
       <section className="workspace">
-        <form className="entry-form" onSubmit={submit}>
-          <label htmlFor="title">タイトル</label>
-          <input id="title" value={title} onChange={(event) => setTitle(event.target.value)} placeholder="今日の気づき" required maxLength={120} />
-          <label htmlFor="body">本文</label>
-          <textarea id="body" value={body} onChange={(event) => setBody(event.target.value)} placeholder="ここに記録を残す" rows={7} required />
+        <form className="diary-form" onSubmit={submit}>
+          <label htmlFor="content">本文</label>
+          <textarea id="content" value={content} onChange={(event) => setContent(event.target.value)} placeholder="ここに記録を残す" rows={7} required />
           <button type="submit" disabled={saving}>{saving ? '保存中…' : '記録を保存する'}</button>
           {error && <p className="error">{error}</p>}
         </form>
 
-        <section className="entries" aria-labelledby="entries-title">
+        <section className="diaries" aria-labelledby="diaries-title">
           <div className="section-heading">
             <p className="eyebrow">ARCHIVE</p>
-            <h2 id="entries-title">これまでの記録</h2>
+            <h2 id="diaries-title">これまでの日記</h2>
           </div>
-          {entries.length === 0 && !error && <p className="empty">まだ記録がありません。最初の一件を書いてみましょう。</p>}
-          <div className="entry-list">
-            {entries.map((entry) => (
-              <article className="entry-card" key={entry.id}>
-                <time>{entry.written_at}</time>
-                <h3>{entry.title}</h3>
-                <p>{entry.body}</p>
+          {diaries.length === 0 && !error && <p className="empty">まだ日記がありません。最初の一件を書いてみましょう。</p>}
+          <div className="diary-list">
+            {diaries.map((diary) => (
+              <article className="diary-card" key={diary.id}>
+                <time>{diary.diary_date}</time>
+                <p>{diary.content}</p>
               </article>
             ))}
           </div>

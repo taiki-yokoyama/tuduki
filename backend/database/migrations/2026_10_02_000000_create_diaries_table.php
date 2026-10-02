@@ -8,18 +8,17 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('entries', function (Blueprint $table): void {
+        Schema::create('diaries', function (Blueprint $table): void {
             $table->id();
-            $table->string('title', 120);
-            $table->text('body');
-            $table->date('written_at');
+            $table->text('content');
+            $table->date('diary_date');
             $table->timestamps();
-            $table->index('written_at');
+            $table->index('diary_date');
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('entries');
+        Schema::dropIfExists('diaries');
     }
 };
