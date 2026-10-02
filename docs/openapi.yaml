@@ -24,8 +24,6 @@ tags:
     description: 記録する人物（Person）
   - name: Diaries
     description: 日記
-  - name: DiaryPerson
-    description: 日記と人物の関連付け
   - name: Images
     description: 日記画像
 
@@ -343,6 +341,7 @@ paths:
     patch:
       operationId: updateDiary
       summary: 日記を更新
+      description: person_ids を指定した場合、日記に紐づく人物を指定一覧へ置き換えます。省略した場合は人物の紐付けを変更しません。
       tags:
         - Diaries
       requestBody:
@@ -373,35 +372,6 @@ paths:
           description: 削除成功。レスポンスボディはありません。
         '404':
           $ref: '#/components/responses/NotFound'
-
-  /diaries/{diary}/people:
-    parameters:
-      - $ref: '#/components/parameters/DiaryId'
-    put:
-      operationId: replaceDiaryPeople
-      summary: 日記に紐づく人物を置き換え
-      description: 既存の人物タグを全削除し、指定された人物 ID の一覧に置き換えます。
-      tags:
-        - DiaryPerson
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/DiaryPeopleRequest'
-      responses:
-        '200':
-          description: 更新後の人物一覧
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Person'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '422':
-          $ref: '#/components/responses/ValidationError'
 
   /images:
     post:
@@ -784,12 +754,6 @@ components:
         diary_date:
           type: string
           format: date
-
-    DiaryPeopleRequest:
-      type: object
-      required:
-        - person_ids
-      properties:
         person_ids:
           type: array
           uniqueItems: true
