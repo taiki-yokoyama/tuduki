@@ -1,0 +1,285 @@
+openapi: 3.1.0
+info:
+  title: Tuduki API
+  version: 1.0.0
+  description: |
+    Tuduki の日記エントリー API。
+    Laravel の API プレフィックスとして /api が付与されます。
+
+servers:
+  - url: http://localhost:8081/api
+    description: Local Docker environment
+
+tags:
+  - name: System
+    description: サービス状態
+  - name: Entries
+    description: 日記エントリー
+
+paths:
+  /health:
+    get:
+      operationId: getHealth
+      summary: API の稼働確認
+      tags:
+        - System
+      responses:
+        '200':
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /entries:
+    get:
+      operationId: listEntries
+      summary: エントリー一覧を取得
+      tags:
+        - Entries
+      responses:
+        '200':
+          description: エントリー一覧
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Entry'
+
+    post:
+      operationId: createEntry
+      summary: エントリーを作成
+      tags:
+        - Entries
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EntryCreateRequest'
+            example:
+              title: 今日の気づき
+              body: Docker 環境の構成を整えた。
+              written_at: '2026-10-02'
+      responses:
+        '201':
+          description: 作成されたエントリー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Entry'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /entries/{entry}:
+    parameters:
+      - $ref: '#/components/parameters/EntryId'
+
+    get:
+      operationId: getEntry
+      summary: エントリーを1件取得
+      tags:
+        - Entries
+      responses:
+        '200':
+          description: エントリー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Entry'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      operationId: replaceEntry
+      summary: エントリーを更新
+      description: Laravel の実装に合わせ、更新対象のフィールドだけを送信できます。
+      tags:
+        - Entries
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EntryUpdateRequest'
+      responses:
+        '200':
+          description: 更新されたエントリー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Entry'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+    patch:
+      operationId: patchEntry
+      summary: エントリーを部分更新
+      tags:
+        - Entries
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EntryUpdateRequest'
+      responses:
+        '200':
+          description: 更新されたエントリー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Entry'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+    delete:
+      operationId: deleteEntry
+      summary: エントリーを削除
+      tags:
+        - Entries
+      responses:
+        '204':
+          description: 削除成功。レスポンスボディはありません。
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+components:
+  parameters:
+    EntryId:
+      name: entry
+      in: path
+      required: true
+      description: エントリー ID
+      schema:
+        type: integer
+        format: int64
+        minimum: 1
+      example: 1
+
+  responses:
+    NotFound:
+      description: 指定されたエントリーが存在しません。
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            message: No query results for model [App\\Models\\Entry].
+
+    ValidationError:
+      description: 入力値が不正です。
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ValidationErrorResponse'
+          example:
+            message: The title field is required.
+            errors:
+              title:
+                - The title field is required.
+
+  schemas:
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - service
+      properties:
+        status:
+          type: string
+          const: ok
+        service:
+          type: string
+          example: tuduki-api
+
+    Entry:
+      type: object
+      required:
+        - id
+        - title
+        - body
+        - written_at
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        title:
+          type: string
+          maxLength: 120
+          example: 今日の気づき
+        body:
+          type: string
+          example: Docker 環境の構成を整えた。
+        written_at:
+          type: string
+          format: date
+          example: '2026-10-02'
+        created_at:
+          type: string
+          format: date-time
+          example: '2026-10-02T04:53:28.000000Z'
+        updated_at:
+          type: string
+          format: date-time
+          example: '2026-10-02T04:53:28.000000Z'
+
+    EntryCreateRequest:
+      type: object
+      required:
+        - title
+        - body
+        - written_at
+      properties:
+        title:
+          type: string
+          maxLength: 120
+        body:
+          type: string
+        written_at:
+          type: string
+          format: date
+
+    EntryUpdateRequest:
+      type: object
+      minProperties: 1
+      properties:
+        title:
+          type: string
+          maxLength: 120
+        body:
+          type: string
+        written_at:
+          type: string
+          format: date
+
+    ErrorResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+
+    ValidationErrorResponse:
+      type: object
+      required:
+        - message
+        - errors
+      properties:
+        message:
+          type: string
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string

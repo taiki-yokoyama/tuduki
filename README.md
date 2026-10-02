@@ -14,6 +14,7 @@ docker compose up --build
 - フロントエンド: http://localhost:5173
 - Laravel API: http://localhost:8081/api/health
 - MySQL: localhost:3306
+- OpenAPI 定義: [docs/openapi.yaml](docs/openapi.yaml)
 
 初回起動時は Laravel の依存関係をイメージにインストールし、MySQL が healthy になってからマイグレーションを実行します。
 
@@ -32,6 +33,7 @@ docker compose down -v # DB データも削除する場合
 ```text
 frontend/       React + Vite + TypeScript
 backend/        Laravel API
+docs/           OpenAPI 定義
 docker/         PHP-FPM / Nginx の設定
 docker-compose.yml
 ```
