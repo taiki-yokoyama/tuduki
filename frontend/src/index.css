@@ -1,0 +1,50 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Shippori+Mincho:wght@400;600;700&display=swap');
+
+:root {
+  color: #302d28;
+  background: #f5f0e8;
+  font-family: 'Shippori Mincho', Georgia, serif;
+  font-synthesis: none;
+  line-height: 1.7;
+  --ink: #302d28;
+  --muted: #8d877d;
+  --line: #ded5c8;
+  --accent: #bf5e3c;
+  --paper: #fbf8f3;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; }
+button, input, textarea { font: inherit; }
+
+.shell { margin: 0 auto; max-width: 1180px; padding: 7rem 2rem 6rem; }
+.hero { max-width: 760px; margin-bottom: 5rem; }
+.eyebrow { color: var(--accent); font: 500 0.72rem/1.2 'DM Mono', monospace; letter-spacing: 0.18em; margin: 0 0 1.1rem; }
+h1, h2, h3, p { margin-top: 0; }
+h1 { font-size: clamp(2.7rem, 6vw, 5rem); font-weight: 600; letter-spacing: -0.05em; line-height: 1.15; margin-bottom: 1.4rem; }
+h1 em { color: var(--accent); font-style: normal; }
+.lead { color: var(--muted); font-size: 1.05rem; }
+.workspace { display: grid; gap: clamp(3rem, 7vw, 8rem); grid-template-columns: minmax(250px, 0.7fr) minmax(0, 1fr); }
+.entry-form { align-self: start; background: var(--paper); border: 1px solid var(--line); padding: 2rem; position: sticky; top: 2rem; }
+label { display: block; font-size: 0.85rem; margin: 0.9rem 0 0.4rem; }
+label:first-child { margin-top: 0; }
+input, textarea { background: transparent; border: 0; border-bottom: 1px solid var(--line); color: var(--ink); outline: 0; padding: 0.65rem 0; resize: vertical; width: 100%; }
+input:focus, textarea:focus { border-color: var(--accent); }
+button { background: var(--accent); border: 0; color: #fffaf4; cursor: pointer; margin-top: 1.7rem; padding: 0.85rem 1rem; transition: opacity 160ms ease; width: 100%; }
+button:disabled { cursor: wait; opacity: 0.55; }
+.section-heading { border-bottom: 1px solid var(--line); margin-bottom: 1.5rem; padding-bottom: 1.2rem; }
+h2 { font-size: 2rem; letter-spacing: -0.04em; margin-bottom: 0; }
+.empty, .error { color: var(--muted); }
+.error { color: var(--accent); font-size: 0.85rem; margin: 1rem 0 0; }
+.entry-list { display: grid; gap: 1.2rem; }
+.entry-card { border-bottom: 1px solid var(--line); padding: 0.5rem 0 1.4rem; }
+.entry-card time { color: var(--accent); font: 0.7rem 'DM Mono', monospace; letter-spacing: 0.08em; }
+.entry-card h3 { font-size: 1.35rem; margin: 0.3rem 0 0.35rem; }
+.entry-card p { color: #625d55; margin-bottom: 0; white-space: pre-wrap; }
+
+@media (max-width: 740px) {
+  .shell { padding: 4rem 1.25rem; }
+  .hero { margin-bottom: 3rem; }
+  .workspace { grid-template-columns: 1fr; }
+  .entry-form { position: static; }
+}
