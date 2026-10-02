@@ -26,16 +26,19 @@ services:
       APP_ENV: ${APP_ENV:-local}
       APP_KEY: ${APP_KEY:-base64:change-me-after-installation}
       APP_DEBUG: ${APP_DEBUG:-true}
-      APP_URL: ${APP_URL:-http://localhost:8080}
+      APP_URL: ${APP_URL:-http://localhost:8081}
       DB_CONNECTION: mysql
       DB_HOST: mysql
       DB_PORT: 3306
       DB_DATABASE: ${MYSQL_DATABASE:-tuduki}
       DB_USERNAME: ${MYSQL_USER:-tuduki}
       DB_PASSWORD: ${MYSQL_PASSWORD:-tuduki}
+      SESSION_DOMAIN: ${SESSION_DOMAIN:-}
+      SESSION_SECURE_COOKIE: ${SESSION_SECURE_COOKIE:-false}
+      SANCTUM_STATEFUL_DOMAINS: ${SANCTUM_STATEFUL_DOMAINS:-localhost:5173,127.0.0.1:5173}
     volumes:
       - ./backend:/var/www/backend
-      - backend_vendor:/var/www/backend/vendor
+      - backend_vendor_v2:/var/www/backend/vendor
       - backend_storage:/var/www/backend/storage
     depends_on:
       mysql:
@@ -58,7 +61,7 @@ services:
       dockerfile: Dockerfile
     working_dir: /app
     environment:
-      VITE_API_URL: ${VITE_API_URL:-http://localhost:8080/api}
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:8081/api}
     volumes:
       - ./frontend:/app
       - frontend_node_modules:/app/node_modules
@@ -70,6 +73,6 @@ services:
 
 volumes:
   mysql_data:
-  backend_vendor:
+  backend_vendor_v2:
   backend_storage:
   frontend_node_modules:

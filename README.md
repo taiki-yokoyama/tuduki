@@ -19,6 +19,17 @@ docker compose up --build
 
 初回起動時は Laravel の依存関係をイメージにインストールし、MySQL が healthy になってからマイグレーションを実行します。
 
+## 認証
+
+Laravel Sanctum の SPA Cookie/Session 方式を使います。フロントエンドは `credentials: 'include'` を付け、状態変更の前に `/sanctum/csrf-cookie` を呼び出します。
+
+- `POST /api/auth/sign-up`
+- `POST /api/auth/sign-in`
+- `POST /api/auth/sign-out`
+- `GET /api/auth/me`
+
+日記 API は認証必須で、`user_id` 単位で自分の日記だけを扱います。
+
 ## よく使うコマンド
 
 ```bash

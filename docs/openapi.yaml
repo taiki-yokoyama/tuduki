@@ -5,13 +5,15 @@ info:
   description: |
     main ブランチの元プロダクト（Memora）の機能を移行するための API 契約。
     認証済みユーザー自身のグループ、人物、日記、タグ、画像を扱います。
+    認証は Laravel Sanctum の Cookie/Session 方式です。状態変更の前に CSRF Cookie を取得し、
+    X-XSRF-TOKEN ヘッダーを送信します。
 
 servers:
   - url: http://localhost:8081/api
     description: Local Docker environment
 
 security:
-  - bearerAuth: []
+  - cookieAuth: []
 
 tags:
   - name: Auth
@@ -28,6 +30,21 @@ tags:
     description: 日記画像
 
 paths:
+  /sanctum/csrf-cookie:
+    servers:
+      - url: http://localhost:8081
+        description: Local Docker environment
+    get:
+      security: []
+      operationId: getCsrfCookie
+      summary: CSRF Cookie を取得
+      description: ログインや日記の作成など、状態を変更する前に呼び出します。
+      tags:
+        - Auth
+      responses:
+        '204':
+          description: CSRF Cookie が設定されました。
+
   /auth/sign-up:
     post:
       security: []
@@ -43,7 +60,7 @@ paths:
               $ref: '#/components/schemas/SignUpRequest'
       responses:
         '201':
-          description: 登録されたユーザーとアクセストークン
+          description: 登録されたユーザー。認証セッションは Cookie に設定されます。
           content:
             application/json:
               schema:
@@ -66,7 +83,7 @@ paths:
               $ref: '#/components/schemas/SignInRequest'
       responses:
         '200':
-          description: ログインしたユーザーとアクセストークン
+          description: ログインしたユーザー。認証セッションは Cookie に設定されます。
           content:
             application/json:
               schema:
@@ -100,7 +117,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/user'
+                $ref: '#/components/schemas/AuthResponse'
         '401':
           $ref: '#/components/responses/Unauthorized'
 
@@ -474,10 +491,11 @@ paths:
 
 components:
   securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: tuduki_session
+      description: Laravel Sanctum が発行する認証セッション Cookie
 
   parameters:
     GroupId:
@@ -551,8 +569,8 @@ components:
         - created_at
       properties:
         id:
-          type: string
-          format: uuid
+          type: integer
+          minimum: 1
         email:
           type: string
           format: email
@@ -581,16 +599,9 @@ components:
       type: object
       required:
         - user
-        - access_token
-        - token_type
       properties:
         user:
           $ref: '#/components/schemas/user'
-        access_token:
-          type: string
-        token_type:
-          type: string
-          const: Bearer
 
     Group:
       type: object

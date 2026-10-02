@@ -4,7 +4,8 @@
     "description": "Tuduki Laravel API",
     "require": {
         "php": "^8.4",
-        "laravel/framework": "^12.0"
+        "laravel/framework": "^12.0",
+        "laravel/sanctum": "^4.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

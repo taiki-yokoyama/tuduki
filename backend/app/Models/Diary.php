@@ -10,6 +10,7 @@ class Diary extends Model
     use HasFactory;
 
     protected $fillable = [
+        'user_id',
         'content',
         'diary_date',
     ];
@@ -19,5 +20,10 @@ class Diary extends Model
         return [
             'diary_date' => 'date:Y-m-d',
         ];
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }
