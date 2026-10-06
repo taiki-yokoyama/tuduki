@@ -182,8 +182,8 @@ paths:
           in: query
           description: グループで絞り込む場合のグループ ID
           schema:
-            type: string
-            format: uuid
+            type: integer
+            minimum: 1
       responses:
         '200':
           description: 名前順の人物一覧。各人物に所属グループを含みます。
@@ -266,8 +266,8 @@ paths:
           in: query
           description: 一緒にいた人物で絞り込む
           schema:
-            type: string
-            format: uuid
+            type: integer
+            minimum: 1
         - name: start_date
           in: query
           description: 取得開始日（この日を含む）
@@ -305,7 +305,7 @@ paths:
               content: 今日は友人とゆっくり話した。
               diary_date: '2026-10-02'
               person_ids:
-                - 7a4b3b25-5b1b-4f5b-9b45-3b0a7e6e0001
+                - 1
               images:
                 - storage_path: 1727840000-cafe.jpg
                   display_order: 0
@@ -474,32 +474,32 @@ components:
       required: true
       description: グループ ID
       schema:
-        type: string
-        format: uuid
+        type: integer
+        minimum: 1
     PersonId:
       name: person
       in: path
       required: true
       description: 人物 ID
       schema:
-        type: string
-        format: uuid
+        type: integer
+        minimum: 1
     DiaryId:
       name: diary
       in: path
       required: true
       description: 日記 ID
       schema:
-        type: string
-        format: uuid
+        type: integer
+        minimum: 1
     ImageId:
       name: image
       in: path
       required: true
       description: 日記画像 ID
       schema:
-        type: string
-        format: uuid
+        type: integer
+        minimum: 1
 
   responses:
     Unauthorized:
@@ -583,8 +583,8 @@ components:
         - created_at
       properties:
         id:
-          type: string
-          format: uuid
+          type: integer
+          minimum: 1
         name:
           type: string
         color:
@@ -623,15 +623,14 @@ components:
         - created_at
       properties:
         id:
-          type: string
-          format: uuid
+          type: integer
+          minimum: 1
         name:
           type: string
         group_id:
           type:
-            - string
+            - integer
             - 'null'
-          format: uuid
         notes:
           type:
             - string
@@ -657,9 +656,8 @@ components:
           minLength: 1
         group_id:
           type:
-            - string
+            - integer
             - 'null'
-          format: uuid
         notes:
           type:
             - string
@@ -677,9 +675,8 @@ components:
           minLength: 1
         group_id:
           type:
-            - string
+            - integer
             - 'null'
-          format: uuid
         notes:
           type:
             - string
@@ -699,8 +696,8 @@ components:
         - images
       properties:
         id:
-          type: string
-          format: uuid
+          type: integer
+          minimum: 1
         content:
           type: string
         diary_date:
@@ -737,8 +734,8 @@ components:
           type: array
           uniqueItems: true
           items:
-            type: string
-            format: uuid
+            type: integer
+            minimum: 1
         images:
           type: array
           items:
@@ -758,8 +755,8 @@ components:
           type: array
           uniqueItems: true
           items:
-            type: string
-            format: uuid
+            type: integer
+            minimum: 1
 
     DiaryImage:
       type: object
@@ -771,11 +768,11 @@ components:
         - url
       properties:
         id:
-          type: string
-          format: uuid
+          type: integer
+          minimum: 1
         diary_id:
-          type: string
-          format: uuid
+          type: integer
+          minimum: 1
         storage_path:
           type: string
         display_order:
