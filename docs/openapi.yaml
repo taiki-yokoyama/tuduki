@@ -620,6 +620,7 @@ components:
         - group_id
         - notes
         - avatar_color
+        - image_url
         - created_at
       properties:
         id:
@@ -638,6 +639,11 @@ components:
         avatar_color:
           type: string
           example: indigo
+        image_url:
+          type:
+            - string
+            - 'null'
+          format: uri
         created_at:
           type: string
           format: date-time
@@ -665,6 +671,11 @@ components:
         avatar_color:
           type: string
           default: indigo
+        image_url:
+          type:
+            - string
+            - 'null'
+          format: uri
 
     PersonUpdateRequest:
       type: object
@@ -683,6 +694,11 @@ components:
             - 'null'
         avatar_color:
           type: string
+        image_url:
+          type:
+            - string
+            - 'null'
+          format: uri
 
     Diary:
       type: object
