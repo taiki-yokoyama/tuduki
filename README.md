@@ -30,6 +30,16 @@ Laravel Sanctum の SPA Cookie/Session 方式を使います。フロントエ�
 
 日記 API は認証必須で、`user_id` 単位で自分の日記だけを扱います。
 
+## 開発用データ
+
+Seeder は user、group、person、diary、diary_people を一つのトランザクションで作成します。
+
+```bash
+docker compose exec backend php artisan db:seed
+```
+
+デフォルトのログイン情報は `demo@example.com` / `password123` です。必要に応じて `.env` の `SEED_USER_EMAIL` と `SEED_USER_PASSWORD` を変更してください。
+
 ## よく使うコマンド
 
 ```bash

@@ -36,6 +36,8 @@ services:
       SESSION_DOMAIN: ${SESSION_DOMAIN:-}
       SESSION_SECURE_COOKIE: ${SESSION_SECURE_COOKIE:-false}
       SANCTUM_STATEFUL_DOMAINS: ${SANCTUM_STATEFUL_DOMAINS:-localhost:5173,127.0.0.1:5173}
+      SEED_USER_EMAIL: ${SEED_USER_EMAIL:-demo@example.com}
+      SEED_USER_PASSWORD: ${SEED_USER_PASSWORD:-password123}
     volumes:
       - ./backend:/var/www/backend
       - backend_vendor_v2:/var/www/backend/vendor
