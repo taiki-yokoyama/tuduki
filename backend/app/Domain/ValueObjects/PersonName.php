@@ -4,18 +4,24 @@ declare(strict_types=1);
 
 namespace App\Domain\ValueObjects;
 
-use InvalidArgumentException;
+use App\Domain\Exceptions\InvalidPersonName;
 
 final class PersonName
 {
+    public const MAX_LENGTH = 20;
+
     private string $value;
 
     public function __construct(string $value)
     {
-        if (preg_match('/\A[0-9A-Za-z\p{Han}\p{Hiragana}\p{Katakana}]+\z/u', $value) !== 1) {
-            throw new InvalidArgumentException(
-                'Person name must contain only alphanumeric characters, kanji, hiragana, or katakana.',
-            );
+        if (
+            mb_strlen($value) > self::MAX_LENGTH
+            || preg_match(
+                '/\A[0-9A-Za-z\p{Han}\p{Hiragana}\p{Katakana}]+(?:[ \x{3000}][0-9A-Za-z\p{Han}\p{Hiragana}\p{Katakana}]+)*\z/u',
+                $value,
+            ) !== 1
+        ) {
+            throw new InvalidPersonName();
         }
 
         $this->value = $value;

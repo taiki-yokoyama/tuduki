@@ -2,13 +2,18 @@
 
 namespace App\Providers;
 
+use App\Domain\Repositories\GroupRepository;
+use App\Domain\Repositories\PersonRepository;
+use App\Infrastructure\Persistence\Repositories\DbGroupRepository;
+use App\Infrastructure\Persistence\Repositories\DbPersonRepository;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        // Application services can be registered here.
+        $this->app->bind(GroupRepository::class, DbGroupRepository::class);
+        $this->app->bind(PersonRepository::class, DbPersonRepository::class);
     }
 
     public function boot(): void
