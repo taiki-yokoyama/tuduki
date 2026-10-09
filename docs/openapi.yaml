@@ -594,6 +594,7 @@ components:
         name:
           type: string
           minLength: 1
+          maxLength: 255
         color:
           type: string
           default: indigo
