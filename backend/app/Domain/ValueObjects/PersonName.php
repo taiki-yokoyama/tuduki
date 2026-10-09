@@ -16,7 +16,10 @@ final class PersonName
     {
         if (
             mb_strlen($value) > self::MAX_LENGTH
-            || preg_match('/\A[0-9A-Za-z\p{Han}\p{Hiragana}\p{Katakana}]+\z/u', $value) !== 1
+            || preg_match(
+                '/\A[0-9A-Za-z\p{Han}\p{Hiragana}\p{Katakana}]+(?:[ \x{3000}][0-9A-Za-z\p{Han}\p{Hiragana}\p{Katakana}]+)*\z/u',
+                $value,
+            ) !== 1
         ) {
             throw new InvalidPersonName();
         }

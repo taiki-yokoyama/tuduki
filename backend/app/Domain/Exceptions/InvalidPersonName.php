@@ -11,7 +11,7 @@ final class InvalidPersonName extends InvalidArgumentException
     public function __construct()
     {
         parent::__construct(
-            'Person name must be 1 to 20 characters and contain only alphanumeric characters, kanji, hiragana, or katakana.',
+            'Person name must be 1 to 20 characters and contain only alphanumeric characters, kanji, hiragana, katakana, or spaces.',
         );
     }
 }
