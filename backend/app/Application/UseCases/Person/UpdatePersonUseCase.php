@@ -6,7 +6,7 @@ namespace App\Application\UseCases\Person;
 
 use App\Application\Commands\Person\UpdatePersonCommand;
 use App\Application\Results\Person\PersonResult;
-use App\Domain\Exceptions\GroupNotFound;
+use App\Domain\Exceptions\InvalidGroupReference;
 use App\Domain\Exceptions\PersonNotFound;
 use App\Domain\Repositories\GroupRepository;
 use App\Domain\Repositories\PersonRepository;
@@ -38,7 +38,7 @@ final class UpdatePersonUseCase
                 : $this->groupRepository->findByIdForUser($command->groupId, $userId);
 
             if ($command->groupId !== null && $group === null) {
-                throw new GroupNotFound();
+                throw new InvalidGroupReference();
             }
 
             $person->setGroupId($command->groupId);
