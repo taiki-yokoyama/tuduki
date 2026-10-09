@@ -240,17 +240,6 @@ paths:
           $ref: '#/components/responses/NotFound'
         '422':
           $ref: '#/components/responses/ValidationError'
-    delete:
-      operationId: deletePerson
-      summary: 人物を削除
-      description: 人物削除時、関連する diary_people も削除されます。
-      tags:
-        - Person
-      responses:
-        '204':
-          description: 削除成功。レスポンスボディはありません。
-        '404':
-          $ref: '#/components/responses/NotFound'
 
   /diaries:
     get:
@@ -628,6 +617,7 @@ components:
           minimum: 1
         name:
           type: string
+          maxLength: 20
         group_id:
           type:
             - integer
@@ -660,6 +650,7 @@ components:
         name:
           type: string
           minLength: 1
+          maxLength: 20
         group_id:
           type:
             - integer
@@ -684,6 +675,7 @@ components:
         name:
           type: string
           minLength: 1
+          maxLength: 20
         group_id:
           type:
             - integer

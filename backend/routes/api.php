@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DiaryController;
 use App\Http\Controllers\Api\HealthController;
+use App\Http\Controllers\Api\PersonController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/health', HealthController::class);
@@ -18,5 +19,9 @@ Route::prefix('auth')->group(function (): void {
 });
 
 Route::middleware('auth:sanctum')->group(function (): void {
+    Route::get('/people', [PersonController::class, 'index']);
+    Route::post('/people', [PersonController::class, 'store']);
+    Route::patch('/people/{person}', [PersonController::class, 'update'])
+        ->whereNumber('person');
     Route::apiResource('diaries', DiaryController::class);
 });

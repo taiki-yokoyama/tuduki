@@ -1,5 +1,9 @@
 <?php
 
+use App\Domain\Exceptions\GroupNotFound;
+use App\Domain\Exceptions\InvalidPersonName;
+use App\Domain\Exceptions\PersonNameAlreadyExists;
+use App\Domain\Exceptions\PersonNotFound;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -18,6 +22,31 @@ return Application::configure(basePath: dirname(__DIR__))
         });
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        $exceptions->render(function (PersonNotFound $exception, Request $request) {
+            return response()->json(['message' => $exception->getMessage()], 404);
+        });
+
+        $exceptions->render(function (GroupNotFound $exception, Request $request) {
+            return response()->json([
+                'message' => $exception->getMessage(),
+                'errors' => ['group_id' => [$exception->getMessage()]],
+            ], 422);
+        });
+
+        $exceptions->render(function (PersonNameAlreadyExists $exception, Request $request) {
+            return response()->json([
+                'message' => $exception->getMessage(),
+                'errors' => ['name' => [$exception->getMessage()]],
+            ], 422);
+        });
+
+        $exceptions->render(function (InvalidPersonName $exception, Request $request) {
+            return response()->json([
+                'message' => $exception->getMessage(),
+                'errors' => ['name' => [$exception->getMessage()]],
+            ], 422);
+        });
+
         $exceptions->shouldRenderJsonWhen(function (Request $request, Throwable $throwable): bool {
             return $request->is('api/*') || $request->expectsJson();
         });
