@@ -2,8 +2,10 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DiaryController;
+use App\Http\Controllers\Api\DiaryImageController;
 use App\Http\Controllers\Api\GroupController;
 use App\Http\Controllers\Api\HealthController;
+use App\Http\Controllers\Api\ImageController;
 use App\Http\Controllers\Api\PersonController;
 use Illuminate\Support\Facades\Route;
 
@@ -24,6 +26,7 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::post('/groups', [GroupController::class, 'store']);
     Route::delete('/groups/{group}', [GroupController::class, 'destroy'])
         ->whereNumber('group');
+    Route::post('/images', [ImageController::class, 'store']);
     Route::get('/people', [PersonController::class, 'index']);
     Route::post('/people', [PersonController::class, 'store']);
     Route::patch('/people/{person}', [PersonController::class, 'update'])
@@ -36,4 +39,11 @@ Route::middleware('auth:sanctum')->group(function (): void {
         ->whereNumber('diary');
     Route::delete('/diaries/{diary}', [DiaryController::class, 'destroy'])
         ->whereNumber('diary');
+    Route::get('/diaries/{diary}/images', [DiaryImageController::class, 'index'])
+        ->whereNumber('diary');
+    Route::post('/diaries/{diary}/images', [DiaryImageController::class, 'store'])
+        ->whereNumber('diary');
+    Route::delete('/diaries/{diary}/images/{image}', [DiaryImageController::class, 'destroy'])
+        ->whereNumber('diary')
+        ->whereNumber('image');
 });

@@ -5,13 +5,12 @@ declare(strict_types=1);
 namespace App\Http\Mappers;
 
 use App\Application\Results\Diary\DiaryResult;
-use App\Domain\Models\DiaryImage;
-use Illuminate\Support\Facades\Storage;
 
 final class DiaryMapper
 {
     public function __construct(
         private PersonMapper $personMapper,
+        private ImageMapper $imageMapper,
     ) {
     }
 
@@ -43,25 +42,9 @@ final class DiaryMapper
                 $result->people,
             ),
             'images' => array_map(
-                fn (DiaryImage $image): array => $this->imageToArray($image),
+                fn ($image): array => $this->imageMapper->diaryImageToArray($image),
                 $result->diary->getImages(),
             ),
-        ];
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function imageToArray(DiaryImage $image): array
-    {
-        $storagePath = (string) $image->getStoragePath();
-
-        return [
-            'id' => $image->getId(),
-            'diary_id' => $image->getDiaryId(),
-            'storage_path' => $storagePath,
-            'display_order' => $image->getDisplayOrder(),
-            'url' => url(Storage::disk('public')->url($storagePath)),
         ];
     }
 }

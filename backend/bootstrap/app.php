@@ -3,6 +3,8 @@
 use App\Domain\Exceptions\GroupNameAlreadyExists;
 use App\Domain\Exceptions\GroupNotFound;
 use App\Domain\Exceptions\DiaryNotFound;
+use App\Domain\Exceptions\DiaryImageLimitExceeded;
+use App\Domain\Exceptions\DiaryImageNotFound;
 use App\Domain\Exceptions\InvalidPersonName;
 use App\Domain\Exceptions\InvalidDiaryPersonReference;
 use App\Domain\Exceptions\InvalidStoragePath;
@@ -39,6 +41,10 @@ return Application::configure(basePath: dirname(__DIR__))
             return response()->json(['message' => $exception->getMessage()], 404);
         });
 
+        $exceptions->render(function (DiaryImageNotFound $exception, Request $request) {
+            return response()->json(['message' => $exception->getMessage()], 404);
+        });
+
         $exceptions->render(function (InvalidGroupReference $exception, Request $request) {
             return response()->json([
                 'message' => $exception->getMessage(),
@@ -54,6 +60,13 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         $exceptions->render(function (InvalidStoragePath $exception, Request $request) {
+            return response()->json([
+                'message' => $exception->getMessage(),
+                'errors' => ['images' => [$exception->getMessage()]],
+            ], 422);
+        });
+
+        $exceptions->render(function (DiaryImageLimitExceeded $exception, Request $request) {
             return response()->json([
                 'message' => $exception->getMessage(),
                 'errors' => ['images' => [$exception->getMessage()]],
