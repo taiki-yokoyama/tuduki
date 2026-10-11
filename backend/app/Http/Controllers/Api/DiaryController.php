@@ -39,7 +39,7 @@ final class DiaryController
             startDate: isset($validated['start_date'])
                 ? new DateTimeImmutable($validated['start_date'])
                 : null,
-            endDate: isset($validated['end_date'])r
+            endDate: isset($validated['end_date'])
                 ? new DateTimeImmutable($validated['end_date'])
                 : null,
         );
