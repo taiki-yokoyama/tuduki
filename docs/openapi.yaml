@@ -747,6 +747,7 @@ components:
             minimum: 1
         images:
           type: array
+          maxItems: 3
           items:
             $ref: '#/components/schemas/DiaryImageAttachRequest'
 
