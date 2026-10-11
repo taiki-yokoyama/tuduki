@@ -12,13 +12,16 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         DB::transaction(function (): void {
-            $user = User::updateOrCreate(
+            $user = User::firstOrNew(
                 ['email' => (string) env('SEED_USER_EMAIL', 'demo@example.com')],
-                [
+            );
+
+            if (! $user->exists) {
+                $user->forceFill([
                     'password' => Hash::make((string) env('SEED_USER_PASSWORD', 'password123')),
                     'email_verified_at' => now(),
-                ],
-            );
+                ])->save();
+            }
 
             $data = $this->seedData();
             $groups = $this->seedGroups($user->id, $data['groups']);
