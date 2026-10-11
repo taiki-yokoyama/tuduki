@@ -2,7 +2,10 @@
 
 use App\Domain\Exceptions\GroupNameAlreadyExists;
 use App\Domain\Exceptions\GroupNotFound;
+use App\Domain\Exceptions\DiaryNotFound;
 use App\Domain\Exceptions\InvalidPersonName;
+use App\Domain\Exceptions\InvalidDiaryPersonReference;
+use App\Domain\Exceptions\InvalidStoragePath;
 use App\Domain\Exceptions\InvalidGroupReference;
 use App\Domain\Exceptions\PersonNameAlreadyExists;
 use App\Domain\Exceptions\PersonNotFound;
@@ -32,10 +35,28 @@ return Application::configure(basePath: dirname(__DIR__))
             return response()->json(['message' => $exception->getMessage()], 404);
         });
 
+        $exceptions->render(function (DiaryNotFound $exception, Request $request) {
+            return response()->json(['message' => $exception->getMessage()], 404);
+        });
+
         $exceptions->render(function (InvalidGroupReference $exception, Request $request) {
             return response()->json([
                 'message' => $exception->getMessage(),
                 'errors' => ['group_id' => [$exception->getMessage()]],
+            ], 422);
+        });
+
+        $exceptions->render(function (InvalidDiaryPersonReference $exception, Request $request) {
+            return response()->json([
+                'message' => $exception->getMessage(),
+                'errors' => ['person_ids' => [$exception->getMessage()]],
+            ], 422);
+        });
+
+        $exceptions->render(function (InvalidStoragePath $exception, Request $request) {
+            return response()->json([
+                'message' => $exception->getMessage(),
+                'errors' => ['images' => [$exception->getMessage()]],
             ], 422);
         });
 
