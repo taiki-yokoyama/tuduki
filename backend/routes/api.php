@@ -28,5 +28,12 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::post('/people', [PersonController::class, 'store']);
     Route::patch('/people/{person}', [PersonController::class, 'update'])
         ->whereNumber('person');
-    Route::apiResource('diaries', DiaryController::class);
+    Route::get('/diaries', [DiaryController::class, 'index']);
+    Route::post('/diaries', [DiaryController::class, 'store']);
+    Route::get('/diaries/{diary}', [DiaryController::class, 'show'])
+        ->whereNumber('diary');
+    Route::patch('/diaries/{diary}', [DiaryController::class, 'update'])
+        ->whereNumber('diary');
+    Route::delete('/diaries/{diary}', [DiaryController::class, 'destroy'])
+        ->whereNumber('diary');
 });

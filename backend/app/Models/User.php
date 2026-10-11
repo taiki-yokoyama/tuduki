@@ -27,8 +27,4 @@ class User extends Authenticatable
         ];
     }
 
-    public function diaries()
-    {
-        return $this->hasMany(Diary::class);
-    }
 }

@@ -43,6 +43,26 @@ final class DbPersonRepository implements PersonRepository
         return $row === null ? null : $this->toDomain($row);
     }
 
+    /**
+     * @param list<int> $personIds
+     * @return list<Person>
+     */
+    public function findByIdsForUser(array $personIds, int $userId): array
+    {
+        if ($personIds === []) {
+            return [];
+        }
+
+        return DB::table('people')
+            ->where('user_id', $userId)
+            ->whereIn('id', $personIds)
+            ->orderBy('name')
+            ->orderBy('id')
+            ->get()
+            ->map(fn (object $row): Person => $this->toDomain($row))
+            ->all();
+    }
+
     public function create(Person $person): Person
     {
         $timestamp = now();
